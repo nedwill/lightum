@@ -333,6 +333,7 @@ int create_pid_file() {
 		fd = open(pidfile, O_RDONLY);
 		if (fd < 0) {
 			fprintf (stderr,"Could not open pid file: %s\n", pidfile);
+            free(procpid);
 			return FALSE;
 		}
 		cnt=read(fd, buf, sizeof(buf)-1);
@@ -349,6 +350,7 @@ int create_pid_file() {
 			fd = open(procpid, O_RDONLY);
 			if (fd < 0) {
 				fprintf (stderr,"Could not open file: %s\n", procpid);
+                free(procpid);
 				return FALSE;
 			}
 
@@ -359,10 +361,14 @@ int create_pid_file() {
 
 			if (strstr(buf,"lightum") != NULL) {
 				fprintf (stderr,"Refusing to start as lightum is already running\n");
+                free(procpid);
 				return FALSE;
 			} else {
-				if (!remove_pid_file()) 
+				if (!remove_pid_file())
+                {
+                    free(procpid);
 					return FALSE;
+                }
 			}
 		}
 	}
@@ -370,6 +376,7 @@ int create_pid_file() {
 	fd = open(pidfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0 ) {
 		fprintf(stderr,"Could not write pid file: %s\n", pidfile);
+        free(procpid);
 		return FALSE;
 	}
 
@@ -377,6 +384,7 @@ int create_pid_file() {
 	if (write(fd, buf, strlen(buf)) < 1) {
 		perror("Something wrong happening while writing pid file");
 		close(fd);
+        free(procpid);
 		return FALSE;
 	}
 	close(fd);

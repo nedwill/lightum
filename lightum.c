@@ -246,6 +246,7 @@ int main(int argc, char *argv[]) {
 
 	if (!conf.ignoresession) {
 		connection = get_dbus_connection();
+        printf("connection = %p\n",connection);
 		proxy_manager = get_dbus_proxy_manager(connection);
 		proxy_session = get_dbus_proxy_session(connection, proxy_manager);
 	}

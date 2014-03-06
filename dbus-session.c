@@ -22,120 +22,121 @@
 
 static gboolean get_boolean (DBusGProxy *proxy, const char *method, gboolean *value)
 {
-        GError  *error;
-        gboolean res;
+    GError  *error;
+    gboolean res;
 
-        error = NULL;
-        res = dbus_g_proxy_call (proxy,
-                                 method,
-                                 &error,
-                                 G_TYPE_INVALID,
-                                 G_TYPE_BOOLEAN, value,
-                                 G_TYPE_INVALID);
-        if (! res) {
-                g_warning ("%s failed: %s", method, error->message);
-                g_error_free (error);
-        }
+    error = NULL;
+    res = dbus_g_proxy_call (proxy,
+            method,
+            &error,
+            G_TYPE_INVALID,
+            G_TYPE_BOOLEAN, value,
+            G_TYPE_INVALID);
+    if (! res) {
+        g_warning ("%s failed: %s", method, error->message);
+        g_error_free (error);
+    }
 
-        return res;
+    return res;
 }
 
 int get_session_active (DBusGProxy *proxy_session)
 {
-        gboolean    is_active;
-        gboolean    is_local;
+    gboolean    is_active;
+    gboolean    is_local;
 
-        get_boolean (proxy_session, "IsActive", &is_active);
-        get_boolean (proxy_session, "IsLocal", &is_local);
+    get_boolean (proxy_session, "IsActive", &is_active);
+    get_boolean (proxy_session, "IsLocal", &is_local);
 
-	if (is_active && is_local) return 1;
-	else return 0;
+    if (is_active && is_local) return 1;
+    else return 0;
 
 }
 
 DBusGProxy* get_dbus_proxy_session(DBusGConnection *connection, DBusGProxy *proxy_manager)
 {
 
-        DBusGProxy *proxy;
-        GError     *error;
-        gboolean    res;
-	char *ssid;
+    DBusGProxy *proxy;
+    GError     *error;
+    gboolean    res;
+    char *ssid;
 
-        error = NULL;
-        res = dbus_g_proxy_call (proxy_manager,
-                                 "GetCurrentSession",
-                                 &error,
-                                 G_TYPE_INVALID,
-                                 DBUS_TYPE_G_OBJECT_PATH, &ssid,
-                                 G_TYPE_INVALID);
+    error = NULL;
+    res = dbus_g_proxy_call (proxy_manager,
+            "GetCurrentSession",
+            &error,
+            G_TYPE_INVALID,
+            DBUS_TYPE_G_OBJECT_PATH, &ssid,
+            G_TYPE_INVALID);
 
-	g_object_unref (proxy_manager);
+    g_object_unref (proxy_manager);
 
-        if (! res) {
-                g_warning ("%s failed: %s", "GetCurrentSession", error->message);
-                g_error_free (error);
-        }
+    if (! res) {
+        g_warning ("%s failed: %s", "GetCurrentSession", error->message);
+        g_error_free (error);
+    }
 
-        proxy = dbus_g_proxy_new_for_name (connection,
-                                           CK_NAME,
-                                           ssid,
-                                           CK_SESSION_INTERFACE);
+    proxy = dbus_g_proxy_new_for_name (connection,
+            CK_NAME,
+            ssid,
+            CK_SESSION_INTERFACE);
 
-        if (proxy == NULL) {
-		g_warning ("Could not get dbus session proxy");
-                exit (1);
-	}
+    if (proxy == NULL) {
+        g_warning ("Could not get dbus session proxy");
+        exit (1);
+    }
 
-	return proxy;
+    return proxy;
 
 }
 
 DBusGProxy* get_dbus_proxy_manager(DBusGConnection *connection)
 {
 
-        DBusGProxy *proxy;
+    DBusGProxy *proxy;
 
-        proxy = dbus_g_proxy_new_for_name (connection,
-                                           CK_NAME,
-                                           CK_MANAGER_PATH,
-                                           CK_MANAGER_INTERFACE);
-        if (proxy == NULL) {
-		g_warning ("Could not get dbus manager proxy");
-                exit (1);
-	}
+    proxy = dbus_g_proxy_new_for_name (connection,
+            CK_NAME,
+            CK_MANAGER_PATH,
+            CK_MANAGER_INTERFACE);
+    if (proxy == NULL) {
+        g_warning ("Could not get dbus manager proxy");
+        exit (1);
+    }
 
-	return proxy;
+    return proxy;
 
 }
 
 DBusGConnection* get_dbus_connection()
 {
-        DBusGConnection *connection;
+    DBusGConnection *connection;
 
-        GOptionContext *context;
-        gboolean        retval;
-        GError         *error = NULL;
+    GOptionContext *context;
+    gboolean        retval;
+    GError         *error = NULL;
 
-        g_type_init ();
+    //g_type_init ();
 
-        context = g_option_context_new (NULL);
-        retval = g_option_context_parse (context, NULL, NULL, &error);
+    context = g_option_context_new (NULL);
+    retval = g_option_context_parse (context, NULL, NULL, &error);
 
-        g_option_context_free (context);
+    g_option_context_free (context);
 
-        if (! retval) {
-                g_warning ("%s", error->message);
-                g_error_free (error);
-                exit(1);
-        }
+    if (! retval) {
+        g_warning ("%s", error->message);
+        g_error_free (error);
+        exit(1);
+    }
 
-        error = NULL;
-        connection = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
-        if (connection == NULL) {
-                g_message ("Failed to connect to the D-Bus daemon: %s", error->message);
-                g_error_free (error);
-                exit (1);
-        }
+    error = NULL;
+    connection = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
+    if (connection == NULL) {
+        g_message ("Failed to connect to the D-Bus daemon: %s", error->message);
+        g_error_free (error);
+        exit (1);
+    }
 
-	return connection;
+    return connection;
 }
+

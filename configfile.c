@@ -75,6 +75,8 @@ int create_config_file(char* file) {
 	path = default_config_dir();
 	create_config_dir(path);
 
+    free(path);
+
 	fd = fopen(file, "w");
 	if (fd == NULL)
 		return FALSE;
